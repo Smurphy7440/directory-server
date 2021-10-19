@@ -1,0 +1,70 @@
+diff --git a/node_modules/directory-tree/lib/directory-tree.js b/node_modules/directory-tree/lib/directory-tree.js
+index 0677c4e..d6afc98 100644
+--- a/node_modules/directory-tree/lib/directory-tree.js
++++ b/node_modules/directory-tree/lib/directory-tree.js
+@@ -7,6 +7,14 @@ const constants = {
+   FILE: 'file'
+ }
+ 
++// function unitConverter(size){
++//   if(Number(size) < 1024) return `${size} B`;
++//   if(Number(size) >= 1024 && Number(size) < Math.pow(10, 6)) return `${Number(size) / 1024} KB`;
++//   if(Number(size) >= Math.pow(10, 6) && Number(size) < Math.pow(10, 9)) return `${Number(size) / Math.pow(10, 6)} MB`;
++//   return `${size} GB`;
++
++// }
++
+ function safeReadDirSync (path) {
+   let dirData = {};
+   try {
+@@ -49,9 +57,10 @@ function isRegExp(regExp) {
+  * @return {Object}
+  */
+ function directoryTree (path, options, onEachFile, onEachDirectory) {
++  //if(path in memo) return memo[path];
+   const name = PATH.basename(path);
+   options = options || {};
+-  path = options.normalizePath ? normalizePath(path) : path;
++  path = options.normalizePath ? normalizePath(path) : PATH.resolve(path);
+   const item = { path, name };
+   let stats;
+   let lstat;
+@@ -98,6 +107,9 @@ function directoryTree (path, options, onEachFile, onEachDirectory) {
+     if (options.attributes) {
+       options.attributes.forEach((attribute) => {
+         switch (attribute) {
++          case 'mode':
++            item.mode = '0' + (stats[attribute] & parseInt('777', 8)).toString(8);
++            break;
+           case 'extension':
+             item.extension = ext;
+             break;
+@@ -105,7 +117,9 @@ function directoryTree (path, options, onEachFile, onEachDirectory) {
+             item.type = constants.FILE;
+             break;
+           default:
++            //item.mode = 0;
+             item[attribute] = stats[attribute];
++            //console.log(stats.mode);
+             break;
+         }
+       });
+@@ -126,6 +140,9 @@ function directoryTree (path, options, onEachFile, onEachDirectory) {
+     if (options.attributes) {
+       options.attributes.forEach((attribute) => {
+         switch (attribute) {
++          case 'mode':
++            item.mode = '0' + (stats[attribute] & parseInt('777', 8)).toString(8);
++            break;
+           case 'size':
+             item.size = item.children.reduce((prev, cur) => prev + cur.size, 0);
+             break;
+@@ -148,6 +165,8 @@ function directoryTree (path, options, onEachFile, onEachDirectory) {
+   } else {
+     return null; // Or set item.size = 0 for devices, FIFO and sockets ?
+   }
++  //MY_MEMO[item.path] = item;
++  //console.log("item", item);
+   return item;
+ }
+ 
