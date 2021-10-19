@@ -14,7 +14,9 @@ const requestRoutes = require('./routes/requests');
 
 // Middleware
 app.use(express.json())
-app.use(cors());
+app.use(cors({
+  origin:'*'
+}));
 app.use('/', requestRoutes)
 
 app.listen(PORT, HOST);
